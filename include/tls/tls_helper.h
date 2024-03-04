@@ -38,6 +38,7 @@ namespace happy_proxy
     //tune_ssl_default_dh_params
     //ssl_default_bind_ciphers
     //...
+    public:
 
     //holds the global tls settings:
     //ciphers:
@@ -110,7 +111,6 @@ namespace happy_proxy
     //nonatomic:
     static bool initialized_; //global initialization flag, for tls_global_init 
     static std::mutex init_mutex_; //global initialization mutex, for tls_global_init
-    public:
     //parameterized constructor:
     tls_globals(const std::string& dh_params_file = "dh_params.pem", const std::string& ecdh_curve = "secp384r1", const std::string& x509_cert_file = "x509_cert.pem", const std::string& x509_key_file = "x509_key.pem", const std::string& x509_ca_file = "x509_ca.pem", const std::string& x509_dh_file = "x509_dh.pem"); 
     //copy constructor:
@@ -173,6 +173,64 @@ namespace happy_proxy
   
   class tls_helper
   {
+    private:
+    
+    //holds the tls session:
+    gnutls_session_t session_;
+    //holds the tls globals:(shared_ptr to tls_globals,with all the tls settings)
+    std::shared_ptr<tls_globals> globals_;
+    std::map<std::string, gnutls_session_t> session_map_;
+    std::mutex mutex_;
+    
+    public:
+    //parameterized constructor:
+    tls_helper(const std::shared_ptr<tls_globals>& globals);
+    //copy constructor:
+    tls_helper(const tls_helper& other);
+    //copy assignment operator:
+    tls_helper& operator=(const tls_helper& other);
+    //move constructor:
+    tls_helper(tls_helper&& other);
+    //destructor:
+    ~tls_helper();
+    //set the x509 credentials:
+    void set_x509_credentials();
+    //set the dh params:
+    void set_dh_params();
+    //set the ecdh params:
+    void set_ecdh_params();
+    //set the anon credentials:
+    void set_anon_credentials(const std::string& session);
+    //set the anon server credentials:
+    void set_anon_server_credentials();
+    //set the priority cache:
+    void set_priority_cache();
+    //set the session:
+    void set_session(gnutls_session_t session);
+    //get the session:
+    gnutls_session_t get_session()const;
+    //get the tls globals:
+    std::shared_ptr<tls_globals> get_globals()const;
+
+    //set the x509 credentials:
+    void set_x509_credentials(const std::string& cert_file, const std::string& key_file, const std::string& ca_file, const std::string& dh_file);
+    //set the dh params:
+    void set_dh_params(const std::string& dh_file);
+    //set the ecdh params:
+    void set_ecdh_params(const std::string& ecdh_curve);
+    //set the anon credentials:
+    void set_anon_credentials(const std::string& anoncred);
+    //set the anon server credentials:
+    void set_anon_server_credentials(const std::string& anon_server_cred);
+    //set the priority cache:
+    void set_priority_cache(const std::string& priority_cache);
+    //set the session:
+    void set_session(const std::string& session);
+    //get the session:
+    gnutls_session_t get_session(const std::string& session)const;//backend/frontend/client
+    //get the tls globals:
+    std::shared_ptr<tls_globals> get_globals(const std::string& globals)const;
+
 
   };
 
