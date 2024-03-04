@@ -1,0 +1,9 @@
+Happy proxy is a c++ implementation of HAPROXY.
+
+It supports HAPROXY configuration files, addons and balance strategies with additional 
+Filtering,automated policies and error prediction /caching capabilities. 
+
+
+
+[B]Made with <3 in San Francisco[/B]
+
