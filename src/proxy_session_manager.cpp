@@ -38,7 +38,7 @@ proxy_session_manager::~proxy_session_manager()
     this->session_log_.close(); 
 }
 
-void proxy_session_manager::Start()
+void proxy_session_manager::start()
 {
     this->running_ = true;
     this->session_log_ << "Session Manager Started" << std::endl;
@@ -46,7 +46,7 @@ void proxy_session_manager::Start()
     this->session_log_.close();     
 }
 // Stops the proxy session manager.
-void proxy_session_manager::Stop()
+void proxy_session_manager::stop()
 {
     this->running_ = false;
     this->session_log_ << "Session Manager Stopped" << std::endl;

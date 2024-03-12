@@ -21,6 +21,7 @@ namespace happy_proxy
     // base class for proxy server
     // this class is responsible for starting and stopping each proxy subserver
     class proxy_session_manager;
+    
     class proxy_server
     {
     protected:
@@ -30,25 +31,33 @@ namespace happy_proxy
         //settings : 
         struct server_details config_;
         std::mutex server_mutex_;
+        
+        std::atomic<bool> running_;
+        std::vector<std::thread> threads_;
 
     public:
         proxy_server(struct server_details &config);
-
+        proxy_server(struct server_details &config, proxy_session_manager* session_manager);
+        //with frontend 
+        proxy_server(const   front_end& frontend,const proxy_session_manager& session_manager); 
+        proxy_server(const   back_end& backend,const proxy_session_manager& session_manager); 
         ~proxy_server();
         // Starts the proxy server.
-        void Start();
+        void start();
         // Stops the proxy server.
-        void Stop();
+        void stop();
         // Returns the port number of the proxy server.
-        int GetPort();
+        int get_port()const;
         //
-        void SetPort(int port);
+        void set_port(int port);
          // Returns the proxy client.
         std::vector<const happy_proxy::ProxyClient *> GetClients() const;
         // Returns the proxy session manager.
         const happy_proxy::proxy_session_manager *GetSessionManager() const;
         //initialize the proxy server when ready to start
-        virtual void Initialize() ;
+        virtual void initialize() ;
+
+        void run();
     };
 }// namespace happy_proxy
 

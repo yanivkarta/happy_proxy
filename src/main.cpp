@@ -43,17 +43,13 @@
 //The proxy is initialized by loading the configurations from local or service/daemon. 
 //The configurations are loaded with HAPROXY configuration files. 
 //The proxy is initialized with the server, client, and session manager. 
-
-
-
  
-
 int main(int argc, char** argv)
 {
     
     //parse the command line arguments 
     //print usage if the arguments are not valid 
-    bool is_daemon = false;
+    bool is_daemon = false;   
     std::string config_file = "happy_proxy.cfg";
     for(int i = 1; i < argc; i++)
     {
@@ -127,7 +123,7 @@ int main(int argc, char** argv)
     //initialize the proxy
     happy_proxy::proxy_config proxy_config(config_file);
     
-    proxy_config.Initialize();
+    proxy_config.initialize();
     //get the backend/frontend servers from the proxy config :
    
     for (auto& frontend : proxy_config.get_frontends())
@@ -167,10 +163,34 @@ int main(int argc, char** argv)
     global.print();
     std::cout << "=========================" << std::endl;
 
-    //initialize the proxy server
+    auto euid = geteuid();
+    if(euid==0)
+    {
+        std::cout << "Running as root" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Running as non-root" << std::endl; 
+        
+    }
+    //register the iptables rules:
+    //register the iptables rules for the frontends and backends
+    //register the conntrack rules for the frontends and backends
+    //register the ktls rules for the frontends and backends
 
+    //initialize the proxy
+    std::vector<happy_proxy::proxy_server*> servers;
+    std::vector<happy_proxy::proxy_client*> clients;
     
+    happy_proxy::proxy_session_manager session_manager;
     
-
-
+    for(auto& frontend : proxy_config.get_frontends())
+    {
+        happy_proxy::proxy_server* server = new happy_proxy::proxy_server(frontend, session_manager);
+        servers.push_back(server);
+    }
+     for(auto& server : servers)
+    {
+        server->start();
+    }
 }

@@ -20,7 +20,7 @@ namespace happy_proxy
         std::string config_file_path_;
         std::vector<std::string> config_file_paths_; 
         //we don't declare the proxy server, client and session manager here. 
-        //we will create them in the Initialize() method. 
+        //we will create them in the initialize() method. 
         
         happy_proxy::ProxyConfigContainerPtr config_;
         std::mutex config_mutex_;
@@ -34,7 +34,7 @@ namespace happy_proxy
 
         // Loads the configurations from local or service/daemon and initializes the proxy. 
         // This is a blocking call and will not return until the proxy is initialized. 
-        void Initialize();
+        void initialize();
         // Returns the proxy session manager. 
         std::string ParseSectionLine(const std::vector<std::string>& sections , const std::string& line) ;
 

@@ -452,7 +452,7 @@ namespace happy_proxy
             std::vector<std::string> use_backends;
             //conversion operator to struct server_details :
             //convert frontend to server details
-            server_details operator() (){
+            server_details operator()()const{
                 struct server_details server;
                 server.name =   name;
                 server.ip_address = happy_proxy::Split<std::string>(this->bind, ":")[0];
@@ -491,7 +491,26 @@ namespace happy_proxy
             std::vector<std::string> request_rules;
             std::vector<std::string> response_rules;
             std::vector<std::string> servers;
-            
+            server_details operator ()()const 
+            {
+                struct server_details server;
+                server.name =   name;
+                server.ip_address = happy_proxy::Split<std::string>(this->bind, ":")[0];
+                server.port = std::stoi(happy_proxy::Split<std::string>(this->bind, ":")[1]);
+                server.check = "";
+                server.check_interval = "";
+                server.check_down = "";
+                server.check_rise = "";
+                server.check_fall = "";
+                server.check_timeout = "";
+                server.check_send = "";
+                server.check_expect = "";
+                server.check_http_send = "";
+                server.check_http_expect = "";
+                server.check_http_expect_error = "";
+                server.check_http_expect_nocache = "";
+                return server;  
+            }
         };  
         typedef struct configuration_file{
         

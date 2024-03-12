@@ -20,8 +20,8 @@ bc1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 etherium wallets:
 0xb794f5fddaa322dce839613fffba74279579268d
 0xaa3d23cac3337effcaaa8c3dcc3ddd92dce8396d
-
+0x
 
 //check wallets:
-
+//
 run check_wallets.sh to validate wallets

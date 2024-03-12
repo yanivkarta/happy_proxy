@@ -58,10 +58,10 @@ namespace happy_proxy
         proxy_session& operator=(proxy_session&& other);
 
         // Starts the proxy session. 
-        void Start();
+        void start();
 
         // Stops the proxy session. 
-        void Stop();
+        void stop();
 
         // Returns the proxy session.
         const proxy_session_manager* GetSessionManager()const; 
@@ -97,7 +97,7 @@ namespace happy_proxy
         //get session details
         const struct session_details GetDetails()const;
         //initialize the proxy session when ready to start
-        virtual void Initialize() ;
+        virtual void initialize() ;
 
         virtual void on_create_session(const proxy_session* session); 
         virtual void on_destroy_session(const proxy_session* session); 

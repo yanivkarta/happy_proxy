@@ -17,13 +17,13 @@ namespace happy_proxy
     {
         //delete this->server_;
     }   
-    void proxy_session::Start()
+    void proxy_session::start()
     {
-        this->server_->Start();
+        this->server_->start();
     }
-    void proxy_session::Stop()
+    void proxy_session::stop()
     {
-        this->server_->Stop();
+        this->server_->stop();
     }
     const proxy_server* proxy_session::GetServer()const
     {
@@ -58,7 +58,7 @@ namespace happy_proxy
         this->manager_->on_destroy_session(session);
     }
     //initialize the proxy session when ready to start
-    void proxy_session::Initialize()
+    void proxy_session::initialize()
     {
         //initialize the proxy session when ready to start
     }

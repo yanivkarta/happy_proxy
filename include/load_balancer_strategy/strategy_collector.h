@@ -45,8 +45,8 @@ namespace happy_proxy
         void update_strategy(const std::shared_ptr<load_balancer::strategy>& strategy); 
         void apply_strategies(); 
         
-        void Start(); 
-        void Stop(); 
+        void start(); 
+        void stop(); 
         
         //thread function to collect with thisptr as argument:
         void Collect( strategy_collector* collector);

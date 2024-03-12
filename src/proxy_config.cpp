@@ -198,7 +198,7 @@ namespace happy_proxy
         delete this->config_;   
     }
 
-    void proxy_config::Initialize()
+    void proxy_config::initialize()
     {
         //map the configuration section, frontend values, acls, backends, servers, etc to the proxy config container 
         //get the mapped values from the config container

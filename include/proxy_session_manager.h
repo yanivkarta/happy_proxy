@@ -56,10 +56,10 @@ namespace happy_proxy
         virtual ~proxy_session_manager();
 
         // Starts the proxy session manager. 
-        virtual void Start();
+        virtual void start();
 
         // Stops the proxy session manager. 
-        virtual void Stop();
+        virtual void stop();
 
         // Returns the proxy session manager.
         // synchronized
@@ -85,10 +85,10 @@ namespace happy_proxy
         default_proxy_session_manager(happy_proxy::proxy_server* server);
         virtual ~default_proxy_session_manager();
         // Starts the proxy session manager. 
-        void Start() override;
+        void start() override;
 
         // Stops the proxy session manager. 
-        void Stop() override;
+        void stop() override;
 
         // Returns the proxy session manager.
         // synchronized
