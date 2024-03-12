@@ -1,112 +1,132 @@
 #include "conntrack/conntrack_policy_maker.h"
+#include <libnetfilter_conntrack/libnetfilter_conntrack.h>
+ #include <libnfnetlink/libnfnetlink.h>
+#include <linux/netfilter/nf_conntrack_common.h>
+#include <linux/netfilter/nf_conntrack_tuple_common.h>
+#include <linux/netfilter/nf_conntrack_tcp.h>
+#include <linux/netfilter/nf_conntrack_sctp.h>
+#include <linux/netfilter/xt_conntrack.h>
+#include <linux/netfilter/xt_helper.h>
+#include <linux/netfilter/xt_iprange.h>
+#include <linux/netfilter/xt_rpfilter.h>
+#include <linux/netfilter/xt_connmark.h>
+
+
 
 namespace happy_proxy
 { 
     namespace conntrack
     {
-        //default listener constructor:
-        conntrack_listener::conntrack_listener():handle_(nullptr), qh_(nullptr), ct_(nullptr), tuple_(nullptr), tcp_info_(nullptr), exp_(nullptr), helper_(nullptr), zone_(nullptr), conntrack_thread_(nullptr), conntrack_running_(false)
-        {
-            //initialize the listener
-            initialize();
 
-        }
+        //happy_proxy::conntrack::connection implementation : 
+              
         
-        //initialize the listener:
-        void conntrack_listener::initialize()
+        //constructor:
+
+        //copy constructor:
+        connection::connection(const connection& other)
         {
-            //initialize the netfilter connection tracking handle:
-            this->handle_ = nfct_open(CONNTRACK, 0);
-            if (!handle_)
-            {
-                throw std::runtime_error("Failed to open netfilter connection tracking handle");
-            }
-            //initialize the netfilter connection tracking queue handle:
-            this->qh_ = nfct_q_create_handle(handle_);
-            if (!qh_)
-            {
-                throw std::runtime_error("Failed to create netfilter connection tracking queue handle");
-            }
-            //initialize the netfilter connection tracking tuple:
-            this->tuple_ = nfct_tuple_alloc();
-            if (!tuple_)
-            {
-                throw std::runtime_error("Failed to allocate netfilter connection tracking tuple");
-            }
-            //initialize the netfilter connection tracking tcp info:
-            this->tcp_info_ = nfct_tcp_alloc();
-            if (!tcp_info_)
-            {
-                throw std::runtime_error("Failed to allocate netfilter connection tracking tcp info");
-            }
-            //initialize the netfilter connection tracking expect:
-            this->exp_ = nfct_expect_alloc();
-            if (!exp_)
-            {
-                throw std::runtime_error("Failed to allocate netfilter connection tracking expect");
-            }
-            //initialize the netfilter connection tracking helper:
-            this->helper_ = nfct_helper_alloc();
-            if (!helper_)
-            {
-                throw std::runtime_error("Failed to allocate netfilter connection tracking helper");
-            }
-            //initialize the netfilter connection tracking zone:
-            this->zone_ = nfct_zone_alloc();
-            if (!zone_)
-            {
-                throw std::runtime_error("Failed to allocate netfilter connection tracking zone");
-            }
-            //initialize the log file:
+            //initialize the connection details:
+            handle_=qh_=ct_=tuple_=tcp_info_=exp_=helper_=zone_=nullptr;
             
-            conntrack_log_.open(log_file_, std::ios::out | std::ios::app);
-            if (!conntrack_log_.is_open())
-            {
-                throw std::runtime_error("Failed to open conntrack log file");
-            }
-            //initialize the conntrack thread:
-            conntrack_thread_ = new std::thread(&conntrack_listener::conntrack_thread, this);
-            if (!conntrack_thread_)
-            {
-                throw std::runtime_error("Failed to create conntrack thread");
-            }
-            //initialize the conntrack running flag:
-            conntrack_running_ = true;
+
+            details_.src_ip = other.details_.src_ip;
+            details_.dst_ip = other.details_.dst_ip;
+            details_.src_port = other.details_.src_port;
+            details_.dst_port = other.details_.dst_port;
+            details_.protocol = other.details_.protocol;
+            details_.state = other.details_.state;
+            details_.direction = other.details_.direction;
+            
+            details_.timeout = other.details_.timeout;  
+            details_.zone = other.details_.zone;
+            details_.id = other.details_.id;
+            details_.mark = other.details_.mark;
+            details_.helper = other.details_.helper;
+            details_.expect = other.details_.expect;
+            details_.mask = other.details_.mask;
+            details_.flags = other.details_.flags;
+            details_.use = other.details_.use;
+            details_.use_expect = other.details_.use_expect;
+            details_.use_helper = other.details_.use_helper;
+            details_.use_zone = other.details_.use_zone;
         }   
-        //run the conntrack thread:
-        void conntrack_listener::conntrack_thread()
+        //connection_details constructor:
+        connection::connection(const connection_details& details):details_(details)
         {
-            //run the conntrack thread:
-            while (conntrack_running_)
+            //initialize the conntrack handle
+            handle_ = nfct_open(CONNTRACK, 0);
+            if (handle_ == nullptr)
             {
-                //run the conntrack listener:
-                run();
+                //log error
+                throw std::runtime_error("nfct_open failed");
             }
-        }       
-        //run the conntrack listener:
-        void conntrack_listener::run()
+            //initialize the conntrack queue handle
+           
+        }
+        //add remove policy callbacks   :
+        /*            void add_backend_callback( std::function<void(const std::string &ip, const std::string &port)> callback); 
+            void remove_backend_callback( std::function<void(const std::string &ip, const std::string &port)> callback);
+            void add_frontend_callback( std::function<void(const std::string &ip, const std::string &port)> callback);
+            void remove_frontend_callback( std::function<void(const std::string &ip, const std::string &port)> callback);
+            void add_policy_callback( std::function<void(const std::string &src_ip, const std::string &dst_ip, const std::string &src_port, const std::string &dst_port, const std::string &protocol, const std::string &state, const std::string &direction, const std::string &timestamp, const std::string &comments, int timeout, int zone, int id, int mark, int helper, int expect, int mask, int flags, int use, int use_expect, int use_helper, int use_zone)> callback);
+            void remove_policy_callback( std::function<void(const std::string &src_ip, const std::string &dst_ip, const std::string &src_port, const std::string &dst_port, const std::string &protocol, const std::string &state, const std::string &direction, const std::string &timestamp, const std::string &comments, int timeout, int zone, int id, int mark, int helper, int expect, int mask, int flags, int use, int use_expect, int use_helper, int use_zone)> callback);
+        */
+        void connection::add_backend_callback( std::function<void(const std::string &ip, const std::string &port)> callback)
         {
-            //run the conntrack listener:
-            int ret = nfct_callback_register(qh_, NFCT_T_ALL, &conntrack_listener::conntrack_callback, this);
-            if (ret < 0)
+            backend_callbacks_.push_back(callback);
+        }   
+        void connection::remove_backend_callback( std::function<void(const std::string &ip, const std::string &port)> callback)
+        {
+             //std::find callback in backend callbacks and remove it
+            for ( auto it = backend_callbacks_.begin(); it != backend_callbacks_.end(); ++it)
             {
-                throw std::runtime_error("Failed to register conntrack callback");
-            }
-            //run the conntrack listener queue:
-            ret = nfct_q_handle_input(qh_);
-            if (ret < 0)
+                if (&(*it) == &callback)
+                {
+                    backend_callbacks_.erase(it);
+                    break;
+                }
+            } 
+        }
+        void connection::add_frontend_callback( std::function<void(const std::string &ip, const std::string &port)> callback)
+        {
+            frontend_callbacks_.push_back(callback);
+        }
+        void connection::remove_frontend_callback( std::function<void(const std::string &ip, const std::string &port)> callback)
+        {
+            //std::find callback in frontend callbacks and remove it
+            for ( auto it = frontend_callbacks_.begin(); it != frontend_callbacks_.end(); ++it)
             {
-                throw std::runtime_error("Failed to handle conntrack queue input");
-            }
-            else
-            {
-                //log the conntrack listener queue input:
-                conntrack_log_ << "Handled conntrack queue input" << std::endl;
+                if (&(*it) == &callback)
+                {
+                    frontend_callbacks_.erase(it);
+                    break;
+                }
             }   
 
-        }   
-        //conntrack input/output  handler: 
+        }
+        void connection::add_policy_callback( std::function<void(const std::string &src_ip, const std::string &dst_ip, const std::string &src_port, const std::string &dst_port, const std::string &protocol, const std::string &state, const std::string &direction, const std::string &timestamp, const std::string &comments, int timeout, int zone, int id, int mark, int helper, int expect, int mask, int flags, int use, int use_expect, int use_helper, int use_zone)> callback)
+        {
+            policy_callbacks_.push_back(callback);
+        }
+        void connection::remove_policy_callback( std::function<void(const std::string &src_ip, const std::string &dst_ip, const std::string &src_port, const std::string &dst_port, const std::string &protocol, const std::string &state, const std::string &direction, const std::string &timestamp, const std::string &comments, int timeout, int zone, int id, int mark, int helper, int expect, int mask, int flags, int use, int use_expect, int use_helper, int use_zone)> callback)
+        {
+            //std::find callback in policy callbacks and remove it
+            for ( auto it = policy_callbacks_.begin(); it != policy_callbacks_.end(); ++it)
+            {
+                if (&(*it) == &callback)
+                {
+                    policy_callbacks_.erase(it);
+                    break;
+                }
+            }       
+        }
+        //destructor
+
+
         
-    } // namespace conntrack    
+     
+    }//namespace conntrack
 
 } // namespace happy_proxy
+// Path: src/conntrack/conntrack_listener.cpp

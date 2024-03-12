@@ -25,6 +25,7 @@ namespace happy_proxy
     //strategy pattern:
     struct strategy_details
     {
+      uint64_t id;
       std::string name;
       std::string description;
       std::string type;
