@@ -2,15 +2,16 @@
 #define __AIO_CONTROL_H_
 
 
-#include <stdint.h>
-#include <aio.h>
-#include <signal.h>
-#include <sys/types.h>
+
 
 #ifdef __CPLUSPLUS__
 extern "C" {
 #endif // __CPLUSPLUS__
 
+
+#include <aio.h>
+
+//aio control structure
 typedef struct aio_control
 {
     int aio_fildes;

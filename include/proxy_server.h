@@ -36,11 +36,11 @@ namespace happy_proxy
         std::vector<std::thread> threads_;
 
     public:
-        proxy_server(struct server_details &config);
-        proxy_server(struct server_details &config, proxy_session_manager* session_manager);
+        proxy_server(server_details &config);
+        proxy_server(server_details &config, proxy_session_manager* session_manager);
         //with frontend 
-        proxy_server(const   front_end& frontend,const proxy_session_manager& session_manager); 
-        proxy_server(const   back_end& backend,const proxy_session_manager& session_manager); 
+        proxy_server(const front_end& frontend,const proxy_session_manager& session_manager); 
+        proxy_server(const back_end& backend,const proxy_session_manager& session_manager); 
         ~proxy_server();
         // Starts the proxy server.
         void start();

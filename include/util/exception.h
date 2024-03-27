@@ -1,38 +1,14 @@
 #ifndef _HAPPY_PROXY_EXCEPTION_H_
 #define _HAPPY_PROXY_EXCEPTION_H_
 
-
-
+#include <exception>
 #include <string>
-#include <vector>
-#include <map>
-#include <set>
-#include <memory>
-#include <mutex>
-#include <thread>
-#include <atomic>
-#include <fstream>
-#include <iostream>
-
 #include <functional>
-//for formatting
-#include <iomanip>
-#include <sstream>
-#include <string>
-#include <iostream>
-#include <vector>
-
-//for syslog
-
-#include <syslog.h>
-#include <sys/types.h>
+#include <signal.h>
 #include <unistd.h>
 
-#include <sys/wait.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
+#include <syslog.h>
 
 namespace happy_proxy
 {

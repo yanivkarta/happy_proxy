@@ -94,7 +94,7 @@ namespace happy_proxy
     //initialize the proxy server when ready to start
     void proxy_server::initialize()
     {
-        //initialize the proxy server
+        this->running_.store(true);
     }
 
    

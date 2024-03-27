@@ -48,10 +48,40 @@ namespace happy_proxy
     {
       SAMPLER_METHOD_SNMP = 0,
       SAMPLER_METHOD_RTSTATS = 1,
-      SAMPLER_METHOD_OTHER = 2
+      SAMPLER_METHOD_LOCAL = 2,
+      SAMPLER_METHOD_OTHER = 3
     };
 
     //sampler statistics 
+    //map of statistics name and value on timepoint 
+
+    template <typename T>
+    class sample 
+    {
+      std::map<std::string, T> statistics_;
+      std::chrono::time_point<std::chrono::system_clock> timestamp_;
+      public:
+      //constructor
+      sample();
+      //copy constructor
+      sample(const sample& other);
+      //copy assignment operator
+      sample& operator=(const sample& other);
+      //move constructor
+      sample(sample&& other);
+      //destructor
+      ~sample();
+      //get the statistics
+      std::map<std::string, T> get_statistics()const;
+      //set the statistics
+      void set_statistics(std::map<std::string, T> statistics);
+      //get the timestamp
+      std::chrono::time_point<std::chrono::system_clock> get_timestamp()const;
+      //set the timestamp
+      void set_timestamp(std::chrono::time_point<std::chrono::system_clock> timestamp);
+    };  
+
+    
 
     
     class sampler
@@ -159,7 +189,7 @@ namespace happy_proxy
       void set_stop_callback(std::function<size_t (sampler_timer&)> stop_callback);
          
     };
-    class snmp_sampler : public sampler
+    class snmp_sampler : public sampler_timer
     {
       std::vector<happy_proxy::server_details> servers_;
       //lock when server_ change or when new statistics are added 
@@ -191,7 +221,72 @@ namespace happy_proxy
       void set_servers(std::vector<server_details> servers);
       //get the servers from the snmp sampler
     };
-      
+    //specialized snmp sampler for cpu statistics 
+
+    class rtstats_sampler : public sampler_timer
+    {
+      std::vector<happy_proxy::server_details> servers_;
+      //lock when server_ change or when new statistics are added 
+      std::mutex monitor_mutex_;
+      public:
+      //constructor
+      rtstats_sampler();
+      //copy constructor
+      rtstats_sampler(const rtstats_sampler& other);
+      //copy assignment operator
+      rtstats_sampler& operator=(const rtstats_sampler& other);
+      //move constructor
+      rtstats_sampler(rtstats_sampler&& other);
+      //destructor
+      virtual ~rtstats_sampler();
+      //add server to the rtstats sampler
+      void add_server(const server_details& server);
+      //remove server from the rtstats sampler
+      void remove_server(const server_details& server);
+      //update server in the rtstats sampler
+      void update_server(const server_details& server);
+      //get the servers from the rtstats sampler
+      std::vector<server_details> get_servers()const;
+      //set the servers for the rtstats sampler
+      void set_servers(std::vector<server_details> servers);
+      //get the servers from the rtstats sampler
+    };
+
+    //local statistics samplers: 
+    //servers are added as context to the sampler 
+    //statitics can automatically filter the servers based on the context 
+    //and sample the statistics from the servers. 
+
+
+    class local_sampler : public sampler_timer
+    {
+      std::vector<happy_proxy::server_details> servers_;
+      //lock when server_ change or when new statistics are added 
+      std::mutex monitor_mutex_;
+      public:
+      //constructor
+      local_sampler();
+      //copy constructor
+      local_sampler(const local_sampler& other);
+      //copy assignment operator
+      local_sampler& operator=(const local_sampler& other);
+      //move constructor
+      local_sampler(local_sampler&& other);
+      //destructor
+      virtual ~local_sampler();
+      //add server to the local sampler
+      void add_server(const server_details& server);
+      //remove server from the local sampler
+      void remove_server(const server_details& server);
+      //update server in the local sampler
+      void update_server(const server_details& server);
+      //get the servers from the local sampler
+      std::vector<server_details> get_servers()const;
+      //set the servers for the local sampler
+      void set_servers(std::vector<server_details> servers);
+      //get the servers from the local sampler
+    };
+
     } //load_balancer
 
 } //happy_proxy

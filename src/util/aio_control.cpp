@@ -1,5 +1,9 @@
 
+extern "C" {
 #include "aio/aio_control.h" 
+#include <aio.h>
+
+
 
 //implementation of aio control operations
 int aio_control_init(aio_control_t *aio_ctrl, int aio_fildes, off_t aio_offset, volatile void *aio_buf, size_t aio_nbytes, int aio_reqprio, struct sigevent aio_sigevent, int aio_lio_opcode)
@@ -17,7 +21,6 @@ int aio_control_init(aio_control_t *aio_ctrl, int aio_fildes, off_t aio_offset, 
 int aio_control_read(aio_control_t *aio_ctrl)
 {
     return aio_read(aio_ctrl->aio_cb );
-
 }
 
 int aio_control_write(aio_control_t *aio_ctrl)
@@ -43,5 +46,6 @@ int aio_control_cancel(aio_control_t *aio_ctrl)
     return aio_cancel( aio_ctrl->aio_fildes, aio_ctrl->aio_cb); 
 
 }
+}// extern "C"
  
 // Path: src/util/aio_control.cpp

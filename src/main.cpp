@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <string>
 //for pid_t
+extern "C"{
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -12,14 +13,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
+}
 //for event loop
 #include <event2/event.h>
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+
 
 //for proxy
 #include "proxy.h"
@@ -31,6 +35,9 @@
 #include "proxy_session_manager.h"
 //hash helper:
 #include "util/hash_helper.h"
+//ktls helper:
+#include "tls/ktls_wrapper.h"
+
 // HAPPY Proxy initialization. 
 //Loads the configurations from local or service/daemon and initializes the proxy. 
 //This is a blocking call and will not return until the proxy is initialized. 
@@ -184,13 +191,23 @@ int main(int argc, char** argv)
     
     happy_proxy::proxy_session_manager session_manager;
     
+    //setup IPTABLES policies and queues 
+    //setup the iptables policies and queues for the frontends and backends
     for(auto& frontend : proxy_config.get_frontends())
     {
         happy_proxy::proxy_server* server = new happy_proxy::proxy_server(frontend, session_manager);
         servers.push_back(server);
     }
-     for(auto& server : servers)
+    for(auto& backend : proxy_config.get_backends())
+    {
+        happy_proxy::proxy_server* server = new happy_proxy::proxy_server(backend, session_manager);
+        servers.push_back(server);
+    }
+    for(auto& server : servers)
     {
         server->start();
     }
+    
+    //test ktls / tls support : 
+    //happy_proxy::ktls ktls;
 }

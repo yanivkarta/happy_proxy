@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 #set the project 
 project(happy_proxy-${_system_name}_${_host_id})    
 
+set(ASM_PLATFORM "x86_64")
 #set the version
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
@@ -10,6 +11,12 @@ set(VERSION_PATCH 0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+#with ASM support
+set(KERNEL_INCLUDE_DIR /usr/src/linux-headers-6.5.0-25-generic/include)
+
+set(KERNEL_TOOLCHAIN_DIR /usr/src/linux-headers-6.5.0-25-generic/tools)
+
+set(KERNEL_ASM_DIR /usr/src/linux-headers-6.5.0-25-generic/arch/x86/include/asm-generic)
 #set the build type
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -17,7 +24,7 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -D_GLIBCXX_USE_CXX11_ABI=0 -Wall -Wextra -Wpedantic -Werror")
 
 #set the include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include  ${CMAKE_CURRENT_SOURCE_DIR}/include/util ${CMAKE_CURRENT_SOURCE_DIR}/include/data ${CMAKE_CURRENT_SOURCE_DIR}/include/glue ${CMAKE_CURRENT_SOURCE_DIR}/include/decision_engine  ${CMAKE_CURRENT_SOURCE_DIR}/include/parsers ${CMAKE_CURRENT_SOURCE_DIR}/include/helpers ${CMAKE_CURRENT_SOURCE_DIR}/include/statistics ${CMAKE_CURRENT_SOURCE_DIR}/include/third_party )   
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include  ${CMAKE_CURRENT_SOURCE_DIR}/include/util ${CMAKE_CURRENT_SOURCE_DIR}/include/data ${CMAKE_CURRENT_SOURCE_DIR}/include/glue ${CMAKE_CURRENT_SOURCE_DIR}/include/decision_engine  ${CMAKE_CURRENT_SOURCE_DIR}/include/parsers ${CMAKE_CURRENT_SOURCE_DIR}/include/helpers ${CMAKE_CURRENT_SOURCE_DIR}/include/statistics ${CMAKE_CURRENT_SOURCE_DIR}/include/third_party ${CMAKE_CURRENT_SOURCE_DIR}/include/conntrack ${CMAKE_CURRENT_SOURCE_DIR}/include/strategies ${CMAKE_CURRENT_SOURCE_DIR}/include/conntrack ${CMAKE_CURRENT_SOURCE_DIR}/include/conntrack/policies ${CMAKE_CURRENT_SOURCE_DIR}/include   )   
 
 
 
@@ -25,7 +32,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include  ${CMAKE_CURRENT_SOURCE_
 set(HAPPY_PROXY_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/exception.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util/aio_control.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/util/interface_info.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/strategies/strategy.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/strategies/strategy_factory.cpp 

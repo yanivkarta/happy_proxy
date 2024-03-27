@@ -37,12 +37,7 @@ namespace happy_proxy
         {
             //destructor
         }
-        //add statistics
-        void sampler::add_statistics(int64_t timestamp, std::map<std::string, std::string> statistics)
-        {
-            this->statistics_[timestamp] = statistics;
-        }
-        //get statistics
+              //get statistics
         std::map<int64_t, std::map<std::string, std::string>> sampler::get_statistics()
         {
             return this->statistics_;
@@ -52,17 +47,7 @@ namespace happy_proxy
         {
             return this->last_sampled_;
         }
-        //get last analyzed time
-        std::chrono::time_point<std::chrono::system_clock> sampler::get_last_analyzed()
-        {
-            return this->last_analyzed_;
-        }
-        //get created time
-        std::chrono::time_point<std::chrono::system_clock> sampler::get_created()
-        {
-            return this->created_;
-        }
-        //sample the statistics
+             //sample the statistics
         void sampler::sample_statistics()
         {
             //if callback is set, call the callback
@@ -97,8 +82,45 @@ namespace happy_proxy
             //constructor
         }   
 
-        //get the statistics from the sampler
+        sampler_timer::~sampler_timer()
+        {
+            //destructor
+        }
 
+
+        //get the start time
+        std::chrono::time_point<std::chrono::system_clock> sampler_timer::get_start_time()
+        {
+            return this->start_time_;
+        }
+        //get the end time
+        std::chrono::time_point<std::chrono::system_clock> sampler_timer::get_end_time()
+        {
+            return this->end_time_;
+        }
+        //get the time elapsed
+        int64_t sampler_timer::get_time_elapsed()
+        {
+            return this->time_elapsed_;
+        }
+        //set the start time
+        void sampler_timer::set_start_time(std::chrono::time_point<std::chrono::system_clock> start_time)
+        {
+            this->start_time_ = start_time;
+        }
+        //set the end time
+        void sampler_timer::set_end_time(std::chrono::time_point<std::chrono::system_clock> end_time)
+        {
+            this->end_time_ = end_time;
+        }
+        //set the time elapsed
+        void sampler_timer::set_time_elapsed(int64_t time_elapsed)
+        {
+            this->time_elapsed_ = time_elapsed;
+        }
+        //sample the statistics
+       
+        
     }
 
 }
