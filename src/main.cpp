@@ -37,6 +37,14 @@ extern "C"{
 #include "util/hash_helper.h"
 //ktls helper:
 #include "tls/ktls_wrapper.h"
+//interface info:
+#include "util/interface_info.h"
+
+
+//iptables helper:
+
+#include "conntrack/iptables_helper.h"
+
 
 // HAPPY Proxy initialization. 
 //Loads the configurations from local or service/daemon and initializes the proxy. 
@@ -57,6 +65,9 @@ int main(int argc, char** argv)
     //parse the command line arguments 
     //print usage if the arguments are not valid 
     bool is_daemon = false;   
+    happy_proxy::interface_info interfaces;
+
+
     std::string config_file = "happy_proxy.cfg";
     for(int i = 1; i < argc; i++)
     {
@@ -180,6 +191,32 @@ int main(int argc, char** argv)
         std::cerr << "Running as non-root" << std::endl; 
         
     }
+    
+    try{
+    happy_proxy::iptables_helper iptables; 
+    }
+    catch(happy_proxy::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+    catch(...)
+    {
+        std::cerr << "Error: unknown exception" << std::endl;
+    } 
+
+    happy_proxy::tls::ktls_wrapper ktls;
+    
+    //initialize the ktls
+
+    //initialize the ip address
+    
+
+    
+    
     //register the iptables rules:
     //register the iptables rules for the frontends and backends
     //register the conntrack rules for the frontends and backends
@@ -190,7 +227,8 @@ int main(int argc, char** argv)
     std::vector<happy_proxy::proxy_client*> clients;
     
     happy_proxy::proxy_session_manager session_manager;
-    
+    std::vector<happy_proxy::tls::ktls_session*> ktls_sessions; 
+
     //setup IPTABLES policies and queues 
     //setup the iptables policies and queues for the frontends and backends
     for(auto& frontend : proxy_config.get_frontends())
@@ -207,7 +245,27 @@ int main(int argc, char** argv)
     {
         server->start();
     }
+    //init conntrack:
+    //initialize the conntrack policies and queues for the frontends and backends 
+
+ 
+    //start the proxy servers
+    //add iptables rules for the frontends and backends 
     
-    //test ktls / tls support : 
-    //happy_proxy::ktls ktls;
+    //test ktls socket
+    int ktls_socket = ktls.ktls_socket( AF_INET, SOCK_STREAM, 0); 
+
+    if(ktls_socket < 0)
+    {
+        std::cerr << "Error: failed to create ktls socket" << std::endl;
+        return 1;
+    }
+    else
+    {
+        std::cout << "KTLS socket created" << std::endl;
+   
+    }
+
+    close (ktls_socket);
+    return 0;
 }

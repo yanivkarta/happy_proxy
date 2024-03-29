@@ -6,9 +6,10 @@
 #include <memory>
 #include <mutex>
 #include <thread>
-#include "iptables_helper.h"
 #include "proxy.h"
 #include "util/exception.h"
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 #include <libnftnl/gen.h>
 #include <libnftnl/table.h>
 #include <libnftnl/chain.h>
@@ -29,187 +30,235 @@
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netfilter/nf_tables.h>
 #include <libmnl/libmnl.h>
+#include <libnftnl/rule.h>
+#include <libnftnl/expr.h>
+#include <libnftnl/chain.h>
+#include <libnftnl/table.h>
+
+#include "iptables_helper.h"
+
+#ifndef MNL_SOCKET_BUFFER_SIZE
+#define MNL_SOCKET_BUFFER_SIZE 32768 
+#endif
+#ifndef MAX_PAYLOAD
+#define MAX_PAYLOAD 4096
+#endif
+
+//for NFTNL_EXPR_FAMILY,
+#include <libnftnl/expr.h>
+//for NFTNL_EXPR_TABLE,
+#include <libnftnl/batch.h>
+
+
+
 namespace happy_proxy
 {
+
+
+    
+
+    //c++ implementation of firewall-nftables.c
+    //https://kernel.googlesource.com/pub/scm/network/connman/connman/+/refs/heads/master/src/firewall-nftables.c
+    //
+
     iptables_helper::iptables_helper() : _nladdr(), _socket(0)
     {
         //constructor
-        _socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_NETFILTER);
-        if (_socket < 0)
+        //initialize iptables helper
+        //initialize netlink handle
+        _socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_NETFILTER); 
+        if (_socket < 0) 
         {
             //throw exception
             throw happy_proxy::exception("Failed to open netlink handle");
         }
         //check permissions
-        if (geteuid() != 0)
+        if (geteuid() != 0) 
         {
             //throw exception
             throw happy_proxy::exception("You must be root to use netlink");
         }
+        //enumerate iptables rules,tables,chains 
+        //and set the iptables rules
+        //to the iptables rules in the system 
 
-       struct nftnl_batch *batch = nftnl_batch_alloc( NFT_MSG_BATCH, 0); 
-        if (!batch) 
-         {
-              //throw exception
-              throw happy_proxy::exception("Failed to allocate batch");
-         }
-        
-        
-       	struct mnl_socket *nl;
-	    struct nft_rule *r;
-	    struct nlmsghdr *nlh;
-	    struct mnl_nlmsg_batch *batch;
-        //family can be NFPROTO_IPV4 or NFPROTO_IPV6 or NFPROTO_UNSPEC (for both) 
-        char buf[MNL_SOCKET_BUFFER_SIZE];
-        unsigned int portid, seq, type;
-        int ret;
-        struct nftnl_rule *rule;
-        struct nftnl_expr *expr;
-        struct nftnl_chain *chain;
-        struct nftnl_table *table;
-        struct nftnl_set *set;
-        struct nftnl_udata *udata;
-        struct nftnl_batch *batch;
-        struct nftnl_expr *expr;
-        
-        nl = mnl_socket_open(NETLINK_NETFILTER);
-        if (nl == NULL) {
-            perror("mnl_socket_open");
-            exit(EXIT_FAILURE);
-        }
-        if (mnl_socket_bind(nl, 0, MNL_SOCKET_AUTOPID) < 0) {
-            perror("mnl_socket_bind");
-            exit(EXIT_FAILURE);
-        }
-        portid = mnl_socket_get_portid(nl);
-        seq = time(NULL);
-        batch = nftnl_batch_alloc(NFT_MSG_BATCH, 0);
-        if (batch == NULL) {
-            perror("nftnl_batch_alloc");
-            exit(EXIT_FAILURE);
-        }
-        table = nftnl_table_alloc();
-        nftnl_table_set_u32(table, NFTNL_TABLE_FAMILY, AF_INET);
-        nftnl_table_set_str(table, NFTNL_TABLE_NAME, "filter");
-        nftnl_batch_add_table(batch, table);
-        chain = nftnl_chain_alloc();
-        nftnl_chain_set_u32(chain, NFTNL_CHAIN_FAMILY, AF_INET);
-        nftnl_chain_set_str(chain, NFTNL_CHAIN_TABLE, "filter");
-        nftnl_chain_set_str(chain, NFTNL_CHAIN_NAME, "input");
-        nftnl_batch_add_chain(batch, chain);
-        rule = nftnl_rule_alloc();
-        nftnl_rule_set_u32(rule, NFTNL_RULE_FAMILY, AF_INET);
-        nftnl_rule_set_str(rule, NFTNL_RULE_TABLE, "filter");
-        nftnl_rule_set_str(rule, NFTNL_RULE_CHAIN, "input");
-        nftnl_rule_set_u32(rule, NFTNL_RULE_POSITION, 0);
-        nftnl_batch_add_rule(batch, rule);
-        expr = nftnl_expr_alloc("counter");
-        nftnl_expr_set_u32(expr, NFTNL_EXPR_FAMILY, AF_INET);
-        nftnl_expr_set_str(expr, NFTNL_EXPR_TABLE, "filter");
 
-        nftnl_expr_set_str(expr, NFTNL_EXPR_CHAIN, "input");
-        nftnl_expr_set_u32(expr, NFTNL_EXPR_POSITION, 0);
-        nftnl_batch_add_expr(batch, expr);
-        ret = nftnl_batch_netlink_send(batch, nl, portid, seq, 0);
-        if (ret < 0) {
-            perror("nftnl_batch_netlink_send");
-            exit(EXIT_FAILURE);
-        }
-        nftnl_batch_free(batch);
-        mnl_socket_close(nl);
-            
 
- 
-    }
+        
+    }//end of constructor
+    
+    //google's compatible connman iptables helper 
 
     iptables_helper::~iptables_helper()
     {
+ 
         //destructor
+        close(_socket); 
     }
 
     int iptables_helper::add_iptables_rule(const char* table, const char* chain, const char* rule)
     {
         //add iptables rule
+        //get table and chain:
+        struct nftnl_table *t = nftnl_table_alloc(); 
+        if (t == NULL) {
+            perror("nftnl_table_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set 'table' name 
+        nftnl_table_set_str(t, NFTNL_TABLE_NAME, table); 
+
+        struct nftnl_chain *c = nftnl_chain_alloc();
+        if (c == NULL) {
+            perror("nftnl_chain_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set chain: 
+        nftnl_chain_set_str(c, NFTNL_CHAIN_TABLE, chain); 
+
+        //set table name
+        //add rule to chain 
+        //allocate rule 
+        struct nftnl_rule *r = nftnl_rule_alloc(); 
+        if (r == NULL) {
+            perror("nftnl_rule_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set rule 
+        nftnl_rule_set_str(r, NFTNL_RULE_CHAIN, rule);
+        //add rule to chain 
+        nftnl_chain_rule_add_tail(r,c); 
+        //free rule
+        nftnl_rule_free(r);
         return 0;
     }
 
     int iptables_helper::delete_iptables_rule(const char* table, const char* chain, const char* rule)
     {
-        //delete iptables rule
+        //get table, chain and rule 
+        struct nftnl_table *t = nftnl_table_alloc(); 
+        if (t == NULL) {
+            perror("nftnl_table_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set 'table' name
+        nftnl_table_set_str(t, NFTNL_TABLE_NAME, table);
+        
+        //get the rules and chain matching the string in the table
+        struct nftnl_chain *c = nftnl_chain_alloc(); 
+        if (c == NULL) {
+            perror("nftnl_chain_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set chain
+        nftnl_chain_set_str(c, NFTNL_CHAIN_TABLE, chain);
+        //get the rule
+        struct nftnl_rule *r = nftnl_rule_alloc(); 
+        if (r == NULL) {
+            perror("nftnl_rule_alloc");
+            exit(EXIT_FAILURE);
+        } 
+        //set rule 
+        nftnl_rule_set_str(r, NFTNL_RULE_CHAIN, rule); 
+        //find rule in chain
+        //delete rule from chain
+        nftnl_chain_rule_del(r);
+        //free rule
+        nftnl_rule_free(r);
         return 0;
+
+        
     }
 
     int iptables_helper::flush_iptables_chain(const char* table, const char* chain)
     {
-        //flush iptables chain
-        return 0;
-    }
+        //flush iptables chain:
+        struct nftnl_table *t = nftnl_table_alloc(); 
+        if (t == NULL) {
+            perror("nftnl_table_alloc");
+            exit(EXIT_FAILURE);
+        } 
+        //set 'table' name 
+        nftnl_table_set_str(t, NFTNL_TABLE_NAME, table); 
+        //get chain
+        struct nftnl_chain *c = nftnl_chain_alloc(); 
+        if (c == NULL) {
+            perror("nftnl_chain_alloc");
+            exit(EXIT_FAILURE);
+        } 
+        //set chain 
+        nftnl_chain_set_str(c, NFTNL_CHAIN_TABLE, chain); 
+        //flush chain 
+        
+        //get the rules from the chain 
+        struct nftnl_rule *r = nftnl_rule_alloc(); 
+        if (r == NULL) {
+            perror("nftnl_rule_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set rule
+        nftnl_rule_set_str(r, NFTNL_RULE_CHAIN, chain);
+        //delete rule from chain
 
+        nftnl_chain_rule_del(r); 
+        return 0; 
+    }
+    
     int iptables_helper::create_iptables_chain(const char* table, const char* chain)
     {
-        //create iptables chain
-        return 0;
+        //create new iptables chain 
+        struct nftnl_table *t = nftnl_table_alloc(); 
+        if (t == NULL) {
+            perror("nftnl_table_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set 'table' name 
+        nftnl_table_set_str(t, NFTNL_TABLE_NAME, table); 
+        //create chain 
+        struct nftnl_chain *c = nftnl_chain_alloc(); 
+        if (c == NULL) {
+            perror("nftnl_chain_alloc");
+            exit(EXIT_FAILURE);
+        } 
+        //set chain 
+        nftnl_chain_set_str(c, NFTNL_CHAIN_TABLE, chain); 
+        return 0; 
+
     }
 
     int iptables_helper::delete_iptables_chain(const char* table, const char* chain)
     {
-        //delete iptables chain
-        return 0;
-    }
+ 
+        //find and delete iptables chain
+        struct nftnl_table *t = nftnl_table_alloc(); 
+        if (t == NULL) {
+            perror("nftnl_table_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set 'table' name 
+        nftnl_table_set_str(t, NFTNL_TABLE_NAME, table); 
+        //get chain
+        struct nftnl_chain *c = nftnl_chain_alloc(); 
+        if (c == NULL) {
+            perror("nftnl_chain_alloc");
+            exit(EXIT_FAILURE);
+        }
+        //set chain
+        nftnl_chain_set_str(c, NFTNL_CHAIN_TABLE, chain); 
+        //delete chain
+        nftnl_chain_free(c); 
 
-    int iptables_helper::list_iptables_chain(const char* table, const char* chain)
-    {
-        //list iptables chain
-        return 0;
-    }
-
-    int iptables_helper::list_iptables_rules(const char* table, const char* chain)
-    {
-        //list iptables rules
-        return 0;
-    }
-
-    int iptables_helper::list_iptables_tables()
-    {
-        //list iptables tables
-        return 0;
-    }
-
-    int iptables_helper::list_iptables_chains(const char* table)
-    {
-        //list iptables chains
-        return 0;
-    }
-
-    int iptables_helper::list_iptables_targets()
-    {
-        //list iptables targets
-        return 0;
-    }
-
-    int iptables_helper::list_iptables_extensions()
-    {
-        //list iptables extensions
-        return 0;
-    }
-
-    int iptables_helper::list_iptables_counters(const char* table, const char* chain)
-    {
-        //list iptables counters
-        return 0;
-    }
-
-    int iptables_helper::zero_iptables_counters(const char* table, const char* chain)
-    {
-        //zero iptables counters
-        return 0;
-    }
-
-    int iptables_helper::   rename_iptables_chain(const char* table, const char* old_chain, const char* new_chain)
-    {
-        //rename iptables chain
-        return 0;
-    }   
-
+         return 0;
+    }//end of delete_iptables_chain
     
-}
+
+    int iptables_helper::load_iptables_rules()
+    {
+        //load iptables rules
+        //load all iptables rules place in maps
+        
+        return 0;
+    }//end of load_iptables_rules   
+
+
+}//end of namespace happy_proxy

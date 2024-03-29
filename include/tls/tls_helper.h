@@ -232,8 +232,7 @@ namespace happy_proxy
     std::shared_ptr<tls_globals> get_globals(const std::string& globals)const;
 
 
-  };
+  };//tls_helper
+}//happy_proxy
 
-
-}
 #endif

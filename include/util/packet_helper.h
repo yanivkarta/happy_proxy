@@ -126,6 +126,24 @@ struct packet_index {
 };
 class PacketHelper
 {   
+    enum packet_format {
+        CISCO_IOS,
+        XDR,
+        NETFLOW,
+        SFLOW,
+        IPFIX,
+        NETSTREAM,
+        PACKFLOW,
+        PCAP,
+        PCAPNG,
+        PCAPNG_EXT,
+
+        //other
+        //AF_IB,AF_IB_ETHERNET,AF_IB_IPv4,AF_IB_IPv6,AF_IB_MPLS,AF_IB_PPP,AF_IB_PPPoE,AF_IB_L2TP,AF_IB_VPLS,AF_IB_8021Q,AF_IB_8021QinQ,AF_IB_8021ad,AF_IB_8021ah, 
+        
+
+    };
+
     void *packet_;
     size_t packet_size_;
     std::vector<packet_index> packet_index_;

@@ -46,6 +46,8 @@ set(HAPPY_PROXY_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/proxy_ev_queues.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/conntrack/conntrack_listener.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/conntrack/conntrack_policy_maker.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/conntrack/iptables_helper.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/src/conntrack/netlink_helper.cpp
     
 
    # ${CMAKE_CURRENT_SOURCE_DIR}/src/proxy_ev_loop.cpp
@@ -72,7 +74,7 @@ set(SOURCE_FILES ${HAPPY_PROXY_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
 add_executable(happy_proxy ${SOURCE_FILES})
 
 #set the libraries add libnetfilter_conntrack
-target_link_libraries(happy_proxy pthread crypto ssl elf nfnetlink netfilter_queue sqlite3 event kqueue aio netfilter_conntrack  ) 
+target_link_libraries(happy_proxy pthread crypto ssl elf nfnetlink netfilter_queue sqlite3 event kqueue aio netfilter_conntrack mnl nftnl ) 
 
 #set the install target
 install(TARGETS happy_proxy DESTINATION bin)

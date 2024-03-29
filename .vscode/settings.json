@@ -62,6 +62,7 @@
         "strstream": "cpp",
         "bitset": "cpp",
         "regex": "cpp",
-        "cerrno": "cpp"
+        "cerrno": "cpp",
+        "csignal": "cpp"
     }
 }
