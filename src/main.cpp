@@ -68,6 +68,7 @@ int main(int argc, char** argv)
     happy_proxy::interface_info interfaces;
 
 
+
     std::string config_file = "happy_proxy.cfg";
     for(int i = 1; i < argc; i++)
     {
@@ -189,9 +190,11 @@ int main(int argc, char** argv)
     else
     {
         std::cerr << "Running as non-root" << std::endl; 
-        
     }
+
     
+    //initialize the iptables helper
+
     try{
     happy_proxy::iptables_helper iptables; 
     }
@@ -208,6 +211,13 @@ int main(int argc, char** argv)
         std::cerr << "Error: unknown exception" << std::endl;
     } 
 
+//set the tls globals:
+
+    //check certificate files on globals:
+    auto dh_file =global.ssl_default_dh_param ;
+    
+    auto ecdh_curve = global.ssl_default_ecdh_curve;
+ 
     happy_proxy::tls::ktls_wrapper ktls;
     
     //initialize the ktls
@@ -216,6 +226,18 @@ int main(int argc, char** argv)
     
 
     
+    //check dh_file: 
+    if(dh_file.empty())
+    {
+        std::cerr << "Error: missing dh file" << std::endl;
+        return 1;
+    }
+    //check ecdh_curve:
+    if(ecdh_curve.empty())
+    {
+        std::cerr << "Error: missing ecdh curve" << std::endl;
+        return 1;
+    }
     
     //register the iptables rules:
     //register the iptables rules for the frontends and backends
