@@ -39,7 +39,8 @@ extern "C"{
 #include "tls/ktls_wrapper.h"
 //interface info:
 #include "util/interface_info.h"
-
+//conntrack listener:
+#include "conntrack/conntrack_listener.h"
 
 //iptables helper:
 
@@ -144,7 +145,7 @@ int main(int argc, char** argv)
     
     proxy_config.initialize();
     //get the backend/frontend servers from the proxy config :
-   
+
     for (auto& frontend : proxy_config.get_frontends())
     {
         std::cout << "Frontend Name: " << frontend.name << std::endl;
@@ -211,7 +212,17 @@ int main(int argc, char** argv)
         std::cerr << "Error: unknown exception" << std::endl;
     } 
 
-//set the tls globals:
+    //set the tls globals:
+
+    //conntrack listener: 
+    //initialize the conntrack listener
+    happy_proxy::conntrack::conntrack_listener listener;
+    //add frontend policies, use acl to add policies :
+    //add callback for the conntrack listener 
+
+    //add backend callbacks
+
+
 
     //check certificate files on globals:
     auto dh_file =global.ssl_default_dh_param ;
@@ -238,7 +249,7 @@ int main(int argc, char** argv)
         std::cerr << "Error: missing ecdh curve" << std::endl;
         return 1;
     }
-    
+
     //register the iptables rules:
     //register the iptables rules for the frontends and backends
     //register the conntrack rules for the frontends and backends
@@ -255,11 +266,38 @@ int main(int argc, char** argv)
     //setup the iptables policies and queues for the frontends and backends
     for(auto& frontend : proxy_config.get_frontends())
     {
+        //print the front end data :
+        std::cout << "Frontend Name: " << frontend.name << std::endl; 
+        //print the front end data :
+        std::cout << "=========================" << std::endl;
+        for(auto& acl : frontend.acls)
+        {
+            std::cout << "ACL: " << acl << std::endl;
+        }
+        std::cout << "Bind: " << frontend.bind << std::endl;
+        std::cout << "Mode: " << frontend.mode << std::endl;
+        for(auto& option : frontend.options)
+        {
+            std::cout << "Option: " << option << std::endl;
+        }
+        std::cout << "=========================" << std::endl;
+        
         happy_proxy::proxy_server* server = new happy_proxy::proxy_server(frontend, session_manager);
         servers.push_back(server);
     }
     for(auto& backend : proxy_config.get_backends())
     {
+        //print the back end data :
+        std::cout << "Backend Name: " << backend.name << std::endl;
+        //print the back end data :
+        std::cout << "=========================" << std::endl;
+        std::cout << backend.mode << std::endl;
+
+        for(auto& server : backend.servers)
+        {
+            std::cout << "Server: " << server << std::endl;
+        }   
+
         happy_proxy::proxy_server* server = new happy_proxy::proxy_server(backend, session_manager);
         servers.push_back(server);
     }
@@ -269,6 +307,7 @@ int main(int argc, char** argv)
     }
     //init conntrack:
     //initialize the conntrack policies and queues for the frontends and backends 
+    //initialize the conntrack policies and queues for the frontends and backends
 
  
     //start the proxy servers
@@ -287,6 +326,15 @@ int main(int argc, char** argv)
         std::cout << "KTLS socket created" << std::endl;
    
     }
+
+    std::cout <<"adding iptables rules for the frontends and backends" << std::endl; 
+
+
+    //add ktls rules for the frontends and backends 
+
+    //start the proxy clients 
+    //add iptables rules for the frontends and backends 
+
 
     close (ktls_socket);
     return 0;

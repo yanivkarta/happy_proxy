@@ -31,6 +31,11 @@
 #include <linux/netfilter/nf_conntrack_tcp.h>
 #include <linux/netfilter/xt_conntrack.h>
 
+//for file/folder stat
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 //for nf_conntrack_type:
 #include <linux/netfilter/nf_conntrack_common.h>
@@ -55,7 +60,23 @@ namespace happy_proxy
                 throw std::runtime_error("Failed to open netfilter connection tracking handle");
             }
              
+            if(log_file_.empty())
+            {
+              
+              log_file_ = "/var/log/happy_proxy/conntrack.log";
+              //check if folder /var/log/happy_proxy exists:
+                std::string folder = "/var/log/happy_proxy";
+                struct stat info;
 
+                if( stat( folder.c_str(), &info ) != 0 )
+                {
+                    //execvp("mkdir", "/var/log/happy_proxy");
+                    
+                     
+
+                }
+
+            }
             conntrack_log_.open(log_file_, std::ios::out | std::ios::app);
             if (!conntrack_log_.is_open())
             {
@@ -433,21 +454,64 @@ namespace happy_proxy
         {
             //nfct_q_handle_input:
             //run the nfct queue handle input:
-            return nfct_q_handle_input(qh);
-        }   
+            std::cout << "nfct_q_handle_input" << std::endl; 
+            //print qh:
+            if(qh != nullptr) {
+                std::cout << "nfct_q_handle_input qh:" << std::hex << std::to_string((uint64_t)qh) << std::dec << std::endl;
+                //print the qh: 
+
+
+                
+            }   
+            else{
+                std::cout << "nfct_q_handle_input qh: nullptr" << std::endl; 
+
+
+            }
+            return 0;
+        }
+         
         //nfct_q_handle_output:
         int conntrack_listener::nfct_q_handle_output(nfct_q_handle *qh)
         {
             //nfct_q_handle_output:
             //run the nfct queue handle output:
-            return nfct_q_handle_output(qh);
+            //print qh :
+            std::cout << "nfct_q_handle_output" << std::endl;
+
+            if(qh != nullptr) {
+                std::cout << "nfct_q_handle_output qh:" << std::hex << std::to_string((uint64_t)qh) << std::dec << std::endl;
+                //print the qh:
+            }
+            else{
+                std::cout << "nfct_q_handle_output qh: nullptr" << std::endl; 
+            }
+
+            return   0;
         }   
         //nfct_q_create_handle:
         nfct_q_handle* conntrack_listener::nfct_q_create_handle(nfct_handle *h)
         {
             //nfct_q_create_handle:
             //create a new nfct queue handle:
-            return nfct_q_create_handle(h);
+            
+            if( h != nullptr) {
+                std::cout << "nfct_q_create_handle h:" << std::hex << std::to_string((uint64_t)h) << std::dec << std::endl;
+                
+            nfct_q_handle* qh =new nfct_q_handle();
+
+            if (!qh)
+            {
+                throw std::runtime_error("Failed to create netfilter connection tracking queue handle");
+            }
+            return qh;                
+            }
+            else{
+                std::cout << "nfct_q_create_handle h: nullptr" << std::endl; 
+            }   
+
+            return nullptr;
+
         }   
       } // namespace conntrack    
 

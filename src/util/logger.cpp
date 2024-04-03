@@ -90,5 +90,4 @@ namespace happy_proxy
         std::cerr << e.what() << std::endl;
     }   
     
-
-}
+} //happy_proxy 
