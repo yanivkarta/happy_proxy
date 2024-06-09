@@ -133,7 +133,9 @@ namespace happy_proxy
         this->log_file_ = "";
     }
     proxy_client::~proxy_client()
-    {
-        
+    {   
+        //delete this;
     }  
+
+    
 }

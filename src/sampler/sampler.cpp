@@ -41,12 +41,7 @@ namespace happy_proxy
         std::map<int64_t, std::map<std::string, std::string>> sampler::get_statistics()
         {
             return this->statistics_;
-        }   
-        //get last sampled time
-        std::chrono::time_point<std::chrono::system_clock> sampler::get_last_sampled()
-        {
-            return this->last_sampled_;
-        }
+        }    
              //sample the statistics
         void sampler::sample_statistics()
         {
@@ -120,7 +115,16 @@ namespace happy_proxy
         }
         //sample the statistics
        
-        
+        void sampler_timer::sample_statistics()
+        {
+            //get the start time
+            this->start_time_ = std::chrono::system_clock::now();
+            //if callback is set, call the callback
+            if(this->sample_callback_)
+            {
+                this->sample_callback_(*this);
+            }
+        }   
     }
 
 }

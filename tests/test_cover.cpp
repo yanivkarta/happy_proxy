@@ -38,6 +38,26 @@ void test_async_event_queues_manager()
     manager.get_epoll_fd();
     return ;
 }//end of test_async_event_queues_manager
+void test_acls()
+{
+    //test acls
+    //parse acl from line like : acl forbidden_dst url_ip
+    //in the context of config file ( frontend, backend, etc)
+    std::string line = "acl forbidden_dst url_ip";
+    std::map<std::string,std::string> acl = happy_proxy::parse_acl(line); 
+    return ;
+}//end of test_acls
 
 
- 
+ void test_unsupervised_classification()
+ {
+
+    //TBD : 
+    //test unsupervised classification
+    //create a matrix to encapsulate stream data features 
+    //create a model to classify the data 
+    //test the model
+    //test the model with a new data
+    
+     return ;
+ }//end of test_unsupervised_classification 

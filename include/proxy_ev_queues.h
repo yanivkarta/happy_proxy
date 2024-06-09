@@ -11,6 +11,12 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+//for timespec/timeval and os timer:
+#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 
 //include linux event queues
 
@@ -22,6 +28,19 @@
 //for proxy
 #include "proxy.h"
 #include "proxy_config.h" 
+#include <chrono>  
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+
+
+
 
 //todo: include tls helper for dltls and tls support.
 namespace happy_proxy
@@ -163,7 +182,8 @@ namespace happy_proxy
 
         //get signal file descriptor
         int get_signal_fd( );
-
+        //init all event queues
+        virtual int init_all( ) = 0;
         
     };
 
@@ -176,32 +196,35 @@ namespace happy_proxy
         event_queues_manager( );
         //destructor
         virtual ~event_queues_manager( );
-        //initialize all event queues
-        int init_all( );
         //add file descriptor to all event queues
-        int add_all(async_event_param *param);
+        int add_all(async_event_param *param = nullptr);
         //remove file descriptor from all event queues
         int remove_all(async_event_param *param);
         //wait for events on all event queues
         int wait_all(async_event_param *param);
+        //init all:
+        virtual int init_all( ) override ;
+
     };
 
     //proactor event queues manager 
     class proactor_event_queues_manager : public asyn_event_queues_manager
     {
+        asyn_event_queues_manager *m_event_queues_manager; 
         public:
         //constructor
         proactor_event_queues_manager( );
         //destructor
         virtual ~proactor_event_queues_manager( );
-        //initialize all event queues
-        int init_all( );
-        //add file descriptor to all event queues
+         //add file descriptor to all event queues
         int add_all(async_event_param *param);
         //remove file descriptor from all event queues
         int remove_all(async_event_param *param);
         //wait for events on all event queues
         int wait_all(async_event_param *param);
+        //init all:
+        virtual int init_all( );
+
     };
 
     //reactor event queues manager
@@ -212,14 +235,15 @@ namespace happy_proxy
         reactor_event_queues_manager( );
         //destructor
         virtual ~reactor_event_queues_manager( );
-        //initialize all event queues
-        int init_all( );
         //add file descriptor to all event queues
         int add_all(async_event_param *param);
         //remove file descriptor from all event queues
         int remove_all(async_event_param *param);
         //wait for events on all event queues
         int wait_all(async_event_param *param);
+        //init all override :
+        virtual int init_all( );
+        
     };  
 
     class io_event 
@@ -294,13 +318,19 @@ namespace happy_proxy
         public:
         io_event_queues_manager( );
         virtual ~io_event_queues_manager( );
-        int init_all( );
+        virtual int init_all( );
         int add_all( );
         int remove_all( );
         int wait_all( );
     };
  
-
+    class io_event_queues_manager_factory
+    {
+        public:
+        io_event_queues_manager_factory( );
+        virtual ~io_event_queues_manager_factory( );
+        io_event_queues_manager *create_io_event_queues_manager( );
+    };  
 }
 
 #endif 

@@ -39,7 +39,7 @@ namespace happy_proxy
     //ssl_default_bind_ciphers
     //...
     public:
-
+    typedef std::enable_shared_from_this<tls_globals> base;
     //holds the global tls settings:
     //ciphers:
     //dh_params:
@@ -90,8 +90,19 @@ namespace happy_proxy
     std::string ssl_default_client_ecdh_curve;
 
     std::string ssl_default_client_proto;
-
-
+    //ssl_default_x509_cert 
+    std::string ssl_default_x509_cert; 
+    //ssl_default_x509_key
+    std::string ssl_default_x509_key;
+    //ssl_default_x509_ca
+    std::string ssl_default_x509_ca;
+    //ssl_default_x509_dh
+    std::string ssl_default_x509_dh; 
+    //ssl_default_x509_crl
+    std::string ssl_default_x509_crl;
+    //ssl_default_x509_ocsp
+    std::string ssl_default_x509_ocsp;
+    
     
     //gnutls global settings:
     gnutls_certificate_credentials_t x509_cred_;
@@ -184,7 +195,7 @@ namespace happy_proxy
     
     public:
     //parameterized constructor:
-    tls_helper(const std::shared_ptr<tls_globals>& globals);
+    tls_helper(const tls_globals& globals, const std::string& session="default"); 
     //copy constructor:
     tls_helper(const tls_helper& other);
     //copy assignment operator:
@@ -219,9 +230,7 @@ namespace happy_proxy
     //set the ecdh params:
     void set_ecdh_params(const std::string& ecdh_curve);
     //set the anon credentials:
-    void set_anon_credentials(const std::string& anoncred);
-    //set the anon server credentials:
-    void set_anon_server_credentials(const std::string& anon_server_cred);
+     void set_anon_server_credentials(const std::string& anon_server_cred);
     //set the priority cache:
     void set_priority_cache(const std::string& priority_cache);
     //set the session:

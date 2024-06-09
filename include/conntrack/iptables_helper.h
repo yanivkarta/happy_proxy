@@ -71,7 +71,7 @@ struct callback_data {
         std::map<std::string, std::string> _counters;
         std::map<std::string, std::string> _policies;
         std::map<std::string, std::string> _tables_chains;
-
+        public:
         //add iptables rule
         int add_iptables_rule(const char* table, const char* chain, const char* rule);
         //delete iptables rule

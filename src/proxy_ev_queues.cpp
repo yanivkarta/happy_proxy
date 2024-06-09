@@ -660,4 +660,26 @@ int asyn_event_queues_manager::add_event_base(async_event_param *param) {
     event_free(ev);
     return 0;   
 } //add_event_base
+
+//proactor constructor/destructor:
+proactor_event_queues_manager::proactor_event_queues_manager( ) {
+    m_event_queues_manager = new event_queues_manager();
+    if (m_event_queues_manager == NULL) {
+        throw std::runtime_error("event_queues_manager failed");
+    }
+    m_event_queues_manager->init_all();
+    
+} //proactor
+proactor_event_queues_manager::~proactor_event_queues_manager() {
+    if (m_event_queues_manager) {
+        delete m_event_queues_manager;
+    }
+} //proactor::~proactor
+
+
+//init_all
+int proactor_event_queues_manager::init_all( ) {
+    return m_event_queues_manager->init_all();
+} //init_all
+
 }//namespace happy_proxy

@@ -143,15 +143,7 @@ namespace happy_proxy {
         }
         
   }; //logger 
-
-
-
-
-
-
-
-
-
+ 
     
   } //namespace
 

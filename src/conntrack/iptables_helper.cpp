@@ -131,7 +131,10 @@ namespace happy_proxy
         //free rule
         nftnl_rule_free(r);
         return 0;
-    }
+        //return 0 on success
+
+    }//end of add_iptables_rule
+
 
     int iptables_helper::delete_iptables_rule(const char* table, const char* chain, const char* rule)
     {
@@ -168,7 +171,7 @@ namespace happy_proxy
         return 0;
 
         
-    }
+    }//end of delete_iptables_rule
 
     int iptables_helper::flush_iptables_chain(const char* table, const char* chain)
     {

@@ -33,6 +33,7 @@ extern "C"{
 #include "proxy_client.h"
 #include "proxy_session.h"
 #include "proxy_session_manager.h"
+#include "proxy_ev_queues.h"
 //hash helper:
 #include "util/hash_helper.h"
 //ktls helper:
@@ -42,9 +43,17 @@ extern "C"{
 //conntrack listener:
 #include "conntrack/conntrack_listener.h"
 
+//tls helper:
+#include "tls/tls_helper.h"
 //iptables helper:
 
+
+
 #include "conntrack/iptables_helper.h"
+
+
+//SAMPLER,STRATEGY:
+#include "sampler/sampler.h"
 
 
 // HAPPY Proxy initialization. 
@@ -193,24 +202,15 @@ int main(int argc, char** argv)
         std::cerr << "Running as non-root" << std::endl; 
     }
 
-    
     //initialize the iptables helper
 
-    try{
-    happy_proxy::iptables_helper iptables; 
-    }
-    catch(happy_proxy::exception& e)
-    {
-        std::cerr << "Error: " << e.what() << std::endl;
-    }
-    catch(std::exception& e)
-    {
-        std::cerr << "Error: " << e.what() << std::endl;
-    }
-    catch(...)
-    {
-        std::cerr << "Error: unknown exception" << std::endl;
-    } 
+    //create libevent server and client
+    //create the libevent server and client for the frontends and backends :
+
+
+    //initialize the proactors/async event queues 
+
+    happy_proxy::proactor_event_queues_manager manager;
 
     //set the tls globals:
 
@@ -228,6 +228,26 @@ int main(int argc, char** argv)
     auto dh_file =global.ssl_default_dh_param ;
     
     auto ecdh_curve = global.ssl_default_ecdh_curve;
+ 
+
+    //test gtls wrapper first
+    happy_proxy::tls_globals     gtls_globals;
+
+    gtls_globals.dh_params_file_ = dh_file;
+    gtls_globals.ecdh_curve_ = ecdh_curve;
+
+    //set the tls globals:
+    gtls_globals.ssl_tune_ssl_default_dh_params_ = true; 
+    gtls_globals.ssl_default_bind_ciphers_ = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384";
+    gtls_globals.ssl_default_bind_options_ = {"no-sslv3", "no-tlsv10", "no-tlsv11"}; 
+    gtls_globals.ssl_default_server_ciphers_ = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384"; 
+    gtls_globals.ssl_default_server_options_ = {"no-sslv3", "no-tlsv10", "no-tlsv11"}; 
+    gtls_globals.ssl_default_client_ciphers_ = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384";
+    gtls_globals.ssl_default_client_options_ = {"no-sslv3", "no-tlsv10", "no-tlsv11"};
+    gtls_globals.ssl_default_client_ctx_ = "client"; 
+    //initialize the tls helper
+    happy_proxy::tls_helper  helper(gtls_globals); 
+    
  
     happy_proxy::tls::ktls_wrapper ktls;
     
@@ -328,14 +348,36 @@ int main(int argc, char** argv)
     }
 
     std::cout <<"adding iptables rules for the frontends and backends" << std::endl; 
+    //use iptables helper to add rules 
+    //add iptables rules for the frontends and backends 
+    //iterate frontends:
+ 
+    happy_proxy::iptables_helper iptables; 
+    
+     for(auto& frontend : proxy_config.get_frontends())
+    { 
+        
+        auto acls = frontend.acls;
+        for (auto& acl : acls)
+        {
+            std::cout << "ACL: " << acl << std::endl;
+            //add iptables rule for the acl
+            iptables.add_iptables_rule("filter", "INPUT", acl.c_str());
+        }   
+    }
+    //add conntrack rules for the frontends and backends 
 
 
     //add ktls rules for the frontends and backends 
 
     //start the proxy clients 
     //add iptables rules for the frontends and backends 
-
+ 
+    //add conntrack rules for the frontends and backends
 
     close (ktls_socket);
     return 0;
-}
+
+ 
+}//end of main
+

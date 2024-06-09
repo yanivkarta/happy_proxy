@@ -132,8 +132,7 @@ namespace happy_proxy
       void set_analyze_callback(std::function<size_t (sampler&)> analyze_callback);
       //get the analyze callback
       std::function<size_t (sampler&)> get_analyze_callback()const;
-      //get the last sampled time
-      std::chrono::time_point<std::chrono::system_clock> get_last_sampled()const; 
+      
       
     };
 
