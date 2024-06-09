@@ -16,7 +16,7 @@
 #include <cstdio>
 #include <set>
 
-namespace provallo
+namespace happy_proxy
 {
 
   const std::string &
@@ -30,7 +30,7 @@ namespace provallo
     std::string value;
     //timestamp
     std::time_t timestamp;
-    
+
   };  
 
 #define REMOVE_LAST_COMMA(x) x[x.length() - 1] = x[x.length() - 1] == ',' ? ' ' : x[x.length() - 1]

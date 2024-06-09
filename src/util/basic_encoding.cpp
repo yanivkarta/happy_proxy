@@ -8,7 +8,7 @@
 #include <string>
 #include <sstream>
 
-namespace provallo
+namespace happy_proxy
 {
   static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
       "abcdefghijklmnopqrstuvwxyz"
@@ -19,8 +19,8 @@ namespace provallo
   {
     return (isalnum (c) || (c == '+') || (c == '/'));
   }
-
-//LOL ;-)
+  
+  //LOL ;-)
 
   inline std::string
   to_hex (unsigned char s)
@@ -49,7 +49,7 @@ namespace provallo
 	else
 	  {
 	    dest += '%';
-	    ::sprintf (szHex, "%-2.2X", ch);
+		sprintf (szHex, "%-2.2X", ch);
 	    dest += szHex[0];
 	    dest += szHex[1];
 	  }
@@ -161,4 +161,6 @@ namespace provallo
     return ret;
   }
 
-}
+
+
+} // namespace happy_proxy

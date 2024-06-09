@@ -21,6 +21,6 @@ namespace happy_proxy
     {
         std::cerr << message << std::endl;
     }
-
+    
     //file exception
 }

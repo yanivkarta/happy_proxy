@@ -29,7 +29,7 @@ namespace std
 }
 // #define DEBUG_MAPS
 
-namespace provallo
+namespace happy_proxy
 {
   //==========================================
   // stat_collector
@@ -39,6 +39,8 @@ namespace provallo
   // re-order and apply realtime operators on the data
   //
 
+
+  //refactor field_base to be a template class
   class field_base
   {
 
@@ -51,7 +53,9 @@ namespace provallo
     std::string _type;
 
   public:
-    field_base(const std::string &name, const std::string &type) : _name(name), _timestamp(0.0), _type(type){};
+    field_base(const std::string &name, const std::string &type) : _name(name), _timestamp(0.0), _type(type){ if (_timestamp==0.0) _timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().clock()).count();}; 
+    
+
 
     // Get name of this field
     std::string
@@ -2001,6 +2005,6 @@ namespace provallo
     }
   }
 
-} /* namespace provallo */
+} /* namespace happy_proxy */
 
 #endif /* STATISTICS_STATCOLLECTOR_H_ */
