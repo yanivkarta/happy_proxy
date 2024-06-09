@@ -5,7 +5,7 @@ add_test(NAME test3 COMMAND test3)
 
 #cmake for cpack
 set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Yaniv") #required  \n 
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Yaniv Karta") #required  \n 
 
 include(CPack)
 

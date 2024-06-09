@@ -63,6 +63,9 @@
         "bitset": "cpp",
         "regex": "cpp",
         "cerrno": "cpp",
-        "csignal": "cpp"
+        "csignal": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "variant": "cpp"
     }
 }
