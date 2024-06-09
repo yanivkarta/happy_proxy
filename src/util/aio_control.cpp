@@ -2,7 +2,7 @@
 extern "C" {
 #include "aio/aio_control.h" 
 #include <aio.h>
-
+#include <signal.h>
 
 
 //implementation of aio control operations
@@ -17,6 +17,7 @@ int aio_control_init(aio_control_t *aio_ctrl, int aio_fildes, off_t aio_offset, 
     aio_ctrl->aio_lio_opcode = aio_lio_opcode;
     return 0;
 }   
+ 
 
 int aio_control_read(aio_control_t *aio_ctrl)
 {
@@ -40,6 +41,23 @@ int aio_control_suspend(aio_control_t *aio_ctrl)
     return aio_suspend( (const aiocb* const*)&aio_ctrl->aio_cb,  1, &timeout); 
 
 }
+
+void aio_set_read_callback(aio_control_t *aio_ctrl, void (*callback)(int, int, struct siginfo_t*, void*), void *data )
+{
+    aio_ctrl->aio_cb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+    aio_ctrl->aio_cb->aio_sigevent.sigev_signo = SIGIO;
+    aio_ctrl->aio_cb->aio_sigevent.sigev_value.sival_ptr = data;
+    aio_ctrl->aio_cb->aio_sigevent.sigev_notify_function = callback; 
+
+}
+void aio_set_write_callback(aio_control_t *aio_ctrl, void (*callback)(int, int, struct siginfo_t*, void*), void *data)
+{
+    aio_ctrl->aio_cb->aio_sigevent.sigev_notify = SIGEV_SIGNAL;
+    aio_ctrl->aio_cb->aio_sigevent.sigev_signo = SIGIO;
+    aio_ctrl->aio_cb->aio_sigevent.sigev_value.sival_ptr = data;
+    aio_ctrl->aio_cb->aio_sigevent.sigev_notify_function = callback;
+
+} 
 
 int aio_control_cancel(aio_control_t *aio_ctrl)
 {
