@@ -86,6 +86,14 @@ namespace happy_proxy
     
     class sampler
     {
+    protected:
+
+      //context:
+      std::chrono::time_point<std::chrono::system_clock> start_time_; 
+      std::chrono::time_point<std::chrono::system_clock> end_time_; 
+      int64_t time_elapsed_;
+
+      //statistics:
       std::chrono::time_point<std::chrono::system_clock> created_; 
       std::map<int64_t, std::map<std::string, std::string>> statistics_; //timestamp, statistics 
       std::chrono::time_point<std::chrono::system_clock> last_sampled_; 
@@ -132,7 +140,11 @@ namespace happy_proxy
       void set_analyze_callback(std::function<size_t (sampler&)> analyze_callback);
       //get the analyze callback
       std::function<size_t (sampler&)> get_analyze_callback()const;
-      
+
+      //set the sample interval
+      void set_sample_interval(int64_t sample_interval);
+      //get the sample interval
+      int64_t get_sample_interval()const;
       
     };
 

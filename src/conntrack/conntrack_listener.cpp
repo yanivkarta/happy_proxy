@@ -72,7 +72,11 @@ namespace happy_proxy
                 {
                     //execvp("mkdir", "/var/log/happy_proxy");
                     
-                     
+                    if (mkdir(folder.c_str(), 0777) != 0)
+                    {
+                        throw std::runtime_error("Failed to create folder /var/log/happy_proxy");
+                    }   
+                    
 
                 }
 
@@ -173,7 +177,7 @@ namespace happy_proxy
             //conntrack_listener* listener = static_cast<conntrack_listener*>(data); 
             //conntrack callback:
             std::cout<<"[+]conntrack callback data pointer:"<<std::hex<<std::to_string((uint64_t)data)<<std::dec<<std::endl; 
-
+            //conntrack callback:
             //
             return 0;
         }   
@@ -504,7 +508,7 @@ namespace happy_proxy
             {
                 throw std::runtime_error("Failed to create netfilter connection tracking queue handle");
             }
-            return qh;                
+                  return qh;                
             }
             else{
                 std::cout << "nfct_q_create_handle h: nullptr" << std::endl; 

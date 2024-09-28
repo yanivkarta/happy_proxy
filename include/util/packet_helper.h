@@ -136,12 +136,9 @@ class PacketHelper
         PACKFLOW,
         PCAP,
         PCAPNG,
-        PCAPNG_EXT,
-
+        PCAPNG_EXT
         //other
         //AF_IB,AF_IB_ETHERNET,AF_IB_IPv4,AF_IB_IPv6,AF_IB_MPLS,AF_IB_PPP,AF_IB_PPPoE,AF_IB_L2TP,AF_IB_VPLS,AF_IB_8021Q,AF_IB_8021QinQ,AF_IB_8021ad,AF_IB_8021ah, 
-        
-
     };
 
     void *packet_;

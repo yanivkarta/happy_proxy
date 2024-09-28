@@ -451,6 +451,7 @@ __extension__ typedef unsigned __int128 uint128_t;
 				combined_b |= b.netmask;
 				return combined < combined_b;
 			}
+        
 		}
 		bool
 		operator==(const prefix<Integer> &b) const

@@ -1,0 +1,5 @@
+automated coccinelle scripting : 
+
+
+Using coccicheck is best as it provides in the spatch command line include options matching the options used when we compile the kernel. You can learn what these options are by using V=1, you could then manually run Coccinelle with debug options added. 
+

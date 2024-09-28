@@ -293,6 +293,8 @@ namespace happy_proxy
             std::this_thread::sleep_for(std::chrono::seconds(5));
             std::lock_guard<std::mutex> lock(server_statistics_mutex_);
             server_statistics_updated_ = true;
+            //collect server statistics
+            
         }
     }
 

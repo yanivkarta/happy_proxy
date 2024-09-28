@@ -115,7 +115,77 @@ namespace provallo
             
         }   
     };  
-
+    //gather from kernel/scatter: 
+    template <typename T>
+    class kernel_gather : public gather<T,0xFFFFFFFF,0xFFFFFFFF>
+    {
+        public:
+        kernel_gather():gather<T,0xFFFFFFFF,0xFFFFFFFF>()
+        {
+            fixed_block_size = false;
+        }
+        ~kernel_gather()
+        {
+            
+        }   
+    }; 
+    //gather from user/scatter: 
+    template <typename T> 
+    class user_gather : public gather<T,0xFFFFFFFF,0xFFFFFFFF>
+    {
+        public:
+        user_gather():gather<T,0xFFFFFFFF,0xFFFFFFFF>()
+        {
+            fixed_block_size = false;
+        }
+        ~user_gather()
+        {
+            
+        }   
+    }; 
+    //gather from network/scatter: 
+    template <typename T>
+    class network_gather : public gather<T,0xFFFFFFFF,0xFFFFFFFF>
+    {
+        public:
+        network_gather():gather<T,0xFFFFFFFF,0xFFFFFFFF>()
+        {
+            fixed_block_size = false;
+        }
+        ~network_gather()
+        {
+            
+        }   
+    };
+    //gather from file/scatter: 
+    template <typename T> 
+    class file_gather : public gather<T,0xFFFFFFFF,0xFFFFFFFF>
+    {
+        public:
+        file_gather():gather<T,0xFFFFFFFF,0xFFFFFFFF>()
+        {
+            fixed_block_size = false;
+        }
+        ~file_gather()
+        {
+            
+        }   
+    };  
+    //gather from memory/scatter:
+    template <typename T>
+    class memory_gather : public gather<T,0xFFFFFFFF,0xFFFFFFFF>
+    {
+        public:
+        memory_gather():gather<T,0xFFFFFFFF,0xFFFFFFFF>()
+        {
+            fixed_block_size = false;
+        }
+        ~memory_gather()
+        {
+            
+        }   
+    };  
+    
 
 }
 

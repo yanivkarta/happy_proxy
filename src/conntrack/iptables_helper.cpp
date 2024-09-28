@@ -34,6 +34,9 @@
 #include <libnftnl/expr.h>
 #include <libnftnl/chain.h>
 #include <libnftnl/table.h>
+#include <libnftnl/batch.h>
+#include <libnftnl/set.h>
+#include <libnftnl/udata.h>
 
 #include "iptables_helper.h"
 
@@ -54,8 +57,7 @@
 namespace happy_proxy
 {
 
-
-    
+ 
 
     //c++ implementation of firewall-nftables.c
     //https://kernel.googlesource.com/pub/scm/network/connman/connman/+/refs/heads/master/src/firewall-nftables.c
@@ -258,10 +260,88 @@ namespace happy_proxy
     int iptables_helper::load_iptables_rules()
     {
         //load iptables rules
-        //load all iptables rules place in maps
-        
-        return 0;
-    }//end of load_iptables_rules   
+        //load all iptables rules place in map
+        auto init_iptables_rules_indices = []() -> std::map<std::string, size_t> {
 
+            std::map<std::string, size_t> iptables_rules_indices;
+            //get all the iptables rules
+            struct nftnl_table *t = nftnl_table_alloc(); 
+            if (t == NULL) {
+                perror("nftnl_table_alloc");
+                exit(EXIT_FAILURE);
+            }   
+            //set 'table' name
+            nftnl_table_set_str(t, NFTNL_TABLE_NAME, "filter"); 
+            //get all the chains
+            struct nftnl_chain *c = nftnl_chain_alloc(); 
+            if (c == NULL) {
+                perror("nftnl_chain_alloc");
+                exit(EXIT_FAILURE);
+            } 
+            //set chain
+            nftnl_chain_set_str(c, NFTNL_CHAIN_TABLE, "nat"); 
+            //get all the rules from the chain      
+            struct nftnl_rule *r = nftnl_rule_alloc(); 
+            if (r == NULL) {
+                perror("nftnl_rule_alloc");
+                exit(EXIT_FAILURE);
+            } 
+            //set rule
+            nftnl_rule_set_str(r, NFTNL_RULE_CHAIN, "nat");
+            //add rule to chain
+            nftnl_chain_rule_add(r, c);
+            //get the rule index
+            size_t rule_index = nftnl_rule_get_u32(r, NFTNL_RULE_POSITION); 
+            iptables_rules_indices["nat"] = rule_index;
+             return iptables_rules_indices;
+
+        }();
+         for (auto& [key, value] : this->iptables_rules_indices_) {
+            std::cout << "key : " << key << " value : " << value << std::endl;  
+
+        }
+        for (auto& [key, value] : init_iptables_rules_indices) {
+            std::cout << "key : " << key << " value : " << value << std::endl;
+        
+        }
+        return 0;
+    }//end of load_iptables_rules 
+    // __connman_firewall_enable_nat  :
+    // __connman_firewall_disable_nat :
+    int iptables_helper::__connman_firewall_enable_nat(struct firewall_context *ctx,
+					char *address, unsigned char prefixlen,
+					char *interface) 
+    {
+        //address,prefix,interface,context:
+        //enable nat for connman firewall
+    
+        if(ctx==NULL)
+        {
+            return -1;
+        }
+        else{
+
+            std::cout << "connman_firewall_enable_nat" << address<<" "<<std::to_string(prefixlen)<<" "<<interface<<" "<< std::endl; 
+        }
+        
+
+        return 0;
+
+    }
+    //__connman_firewall_init:
+    int iptables_helper::__connman_firewall_init(void) 
+    {
+        std::cout << "connman_firewall_init" << std::endl; 
+
+        return 0;
+    }
+    // Print all iptables rules
+    void iptables_helper::print_iptables_rules() {
+        for (const auto& rule : iptables_rules_indices_) {
+            std::cout << "Rule: " << rule.first << " Index: " << rule.second << std::endl;
+        }
+    }
+
+    //end of class iptables_helper
 
 }//end of namespace happy_proxy

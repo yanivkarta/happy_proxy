@@ -68,7 +68,8 @@ namespace happy_proxy
       std::mutex mutex_;
       std::atomic<bool> updated_; 
       bool _sticky_session_;
-
+      std::mt19937 gen_;
+      std::uniform_int_distribution<> distribution_;
 
     public:
       strategy(const strategy_details& details) : details_(details),_sticky_session_(false) {}

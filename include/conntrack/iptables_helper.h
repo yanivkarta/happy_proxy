@@ -71,6 +71,8 @@ struct callback_data {
         std::map<std::string, std::string> _counters;
         std::map<std::string, std::string> _policies;
         std::map<std::string, std::string> _tables_chains;
+        //indices:
+        std::map<std::string, size_t> iptables_rules_indices_;
         public:
         //add iptables rule
         int add_iptables_rule(const char* table, const char* chain, const char* rule);
@@ -173,11 +175,10 @@ struct callback_data {
         int __connman_firewall_disable_nat(struct firewall_context *ctx);
 
         int __connman_firewall_disable_snat(struct firewall_context *ctx) ;
-
-
         int __connman_firewall_init(void);
         int __connman_firewall_cleanup(void); 
-
+        void print_iptables_rules();
+        
         iptables_helper();
         virtual ~iptables_helper();
         //load all iptables rules place in maps

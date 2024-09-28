@@ -23,16 +23,19 @@ namespace happy_proxy
     {
         std::map<std::string,std::string> acl;
         std::vector<std::string> tokens = happy_proxy::split(line);
-        if(tokens.size() != 4)
+        if(tokens.size() < 4)
         {
             throw happy_proxy::exception("Error: invalid acl line");
         }
-        acl["type"] = tokens[1];
-        acl["name"] = tokens[2];
-        acl["value"] = tokens[3];
+        acl["type"]=tokens[0];
+        acl["policy"] =tokens[1];//forbidden,allow,etc...
+        acl["resource_type"] = tokens[2];//url_ip,etc..
+        acl["resource"] =tokens[3];
+        
+
         return acl;
     }
- 
+    
 
     
 };

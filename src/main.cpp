@@ -207,6 +207,16 @@ int main(int argc, char** argv)
     //create libevent server and client
     //create the libevent server and client for the frontends and backends :
 
+    happy_proxy::iptables_helper iptables_helper;
+    iptables_helper.create_iptables_chain("nat", "PREROUTING"); 
+    iptables_helper.create_iptables_chain("nat", "POSTROUTING"); 
+
+    //create the proactors/async event queues 
+    iptables_helper.create_iptables_chain("nat", "happy_proxy"); 
+    iptables_helper.create_iptables_chain("nat", "happy_proxy_in"); 
+    iptables_helper.create_iptables_chain("nat", "happy_proxy_out"); 
+
+    //create the proactors/async event queues    
 
     //initialize the proactors/async event queues 
 
@@ -222,14 +232,18 @@ int main(int argc, char** argv)
 
     //add backend callbacks
 
+    //listener.add_backend_callback(happy_proxy::conntrack::conntrack_listener::backend_callback); 
+    
+    listener.initialize();
+
+    listener.run();
 
 
     //check certificate files on globals:
     auto dh_file =global.ssl_default_dh_param ;
     
     auto ecdh_curve = global.ssl_default_ecdh_curve;
- 
-
+    
     //test gtls wrapper first
     happy_proxy::tls_globals     gtls_globals;
 
@@ -351,9 +365,10 @@ int main(int argc, char** argv)
     //use iptables helper to add rules 
     //add iptables rules for the frontends and backends 
     //iterate frontends:
- 
+    //iterate acls:
+    //add iptables rule for the acl
     happy_proxy::iptables_helper iptables; 
-    
+
      for(auto& frontend : proxy_config.get_frontends())
     { 
         
@@ -365,16 +380,20 @@ int main(int argc, char** argv)
             iptables.add_iptables_rule("filter", "INPUT", acl.c_str());
         }   
     }
-    //add conntrack rules for the frontends and backends 
 
-
-    //add ktls rules for the frontends and backends 
-
-    //start the proxy clients 
-    //add iptables rules for the frontends and backends 
- 
-    //add conntrack rules for the frontends and backends
-
+    for(auto& backend : proxy_config.get_backends())
+    {
+        auto servers = backend.servers;
+        for (auto& server : servers)
+        {
+            std::cout << "Server: " << server << std::endl;
+            //add iptables rule for the server
+            iptables.add_iptables_rule("nat", "PREROUTING", server.c_str());
+        }
+    }
+    //print iptables rules
+    iptables.print_iptables_rules();
+    
     close (ktls_socket);
     return 0;
 

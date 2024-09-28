@@ -22,8 +22,7 @@ namespace happy_proxy
 {
     namespace load_balancer
     {
-
-
+ 
         //base class  sampler
          
         sampler::sampler():created_(std::chrono::system_clock::now()), last_sampled_(std::chrono::system_clock::now()), last_analyzed_(std::chrono::system_clock::now()), statistics_()
