@@ -44,6 +44,7 @@ namespace happy_proxy
         std::string log_file_;
         std::ofstream session_log_;
         std::mutex log_mutex;
+        int client_sock_;
      public:
         explicit proxy_session(happy_proxy::proxy_session_manager* manager, happy_proxy::proxy_server* server); 
         explicit proxy_session(happy_proxy::proxy_session_manager* manager,const  struct happy_proxy::server_details& serverdetails);
@@ -102,7 +103,15 @@ namespace happy_proxy
         virtual void on_create_session(const proxy_session* session); 
         virtual void on_destroy_session(const proxy_session* session); 
 
-        
+        // Returns the client socket.
+        int get_client_socket()const
+        {
+           return this->client_sock_;
+        }
+        void set_client_socket(int client_sock){
+            this->client_sock_ = client_sock;
+        }
+            
         //get clients:
         //std::vector<const happy_proxy::proxy_client*> GetClients() const;        
      };

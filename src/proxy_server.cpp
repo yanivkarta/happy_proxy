@@ -64,17 +64,61 @@ namespace happy_proxy
     }
 
     void proxy_server::run()
-    {
-       do
-       {
-            //handle input from clients
-            //handle output to clients
-            //handle input from servers
-            //handle output to servers
-            std::cout << "." << std::endl;
+    {    int listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (listen_socket == -1) {
+        perror("socket");
+        return;
+    }
 
-       } while (this->running_.load() == true);
-       
+    // Set the socket to allow multiple connections
+    int enable = 1;
+    if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+        perror("setsockopt(SO_REUSEADDR) failed");
+        close(listen_socket);
+        return;
+    }
+
+    // Bind the socket to the specified address and port
+    struct sockaddr_in server_address;
+    memset(&server_address, 0, sizeof(server_address));
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_port = htons(config_.port);
+    if (bind(listen_socket, (struct sockaddr *)&server_address, sizeof(server_address)) < 0) {
+        perror("bind failed");
+        close(listen_socket);
+        return;
+    }
+
+    // Listen for incoming connections
+    if (listen(listen_socket, 3) < 0) {
+        perror("listen failed");
+        close(listen_socket);
+        return;
+    }
+
+    // Accept incoming connections
+    while (this->running_.load() == true) {
+        struct sockaddr_in client_address;
+        socklen_t client_address_len = sizeof(client_address);
+        int client_socket = accept(listen_socket, (struct sockaddr *)&client_address, &client_address_len);
+        if (client_socket < 0) {
+            perror("accept failed");
+            continue;
+        }
+
+        // Create a new proxy session for the client
+        proxy_session* session = new proxy_session(this->session_manager_, this);
+        session->set_client_socket(client_socket);
+        session->start();
+
+        // Add the session to the session manager
+        this->session_manager_->on_create_session(session);
+    }
+
+    // Close the listen socket
+    close(listen_socket);
+
     }
     void proxy_server::stop()
     {
